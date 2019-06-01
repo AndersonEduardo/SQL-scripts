@@ -1,0 +1,121 @@
+MySQL
+
+instalacao: vide documentacao: https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
+
+ver status do mysql (no terminal): sudo service mysql status
+
+startar mysql (no terminal):  sudo service mysql start
+
+parar o mysql (no terminal):  sudo service mysql stop
+
+entrar: digitar no terminal: mysql -u root -p
+
+sair: EXIT
+
+obter usuario e servidor da sessão atual: select current_user(); 
+
+obter o host da sessão atual: select @@hostname;
+
+obter o database da sessão atual: select database();
+
+obter informações (ex.: porta da conecção): show variables;
+
+mostrar bancos de dados: SHOW DATABASES;
+
+criar banco de dados: 	CREATE DATABASE dbteste;
+
+deletar um banco de dados: DROP DATABASE dbteste; 
+
+selecionando banco de dados para usar: USE dbteste;
+
+criar uma tabela no banco de dados: CREATE TABLE books(title VARCHAR(50) NOT NULL,
+							price INT NOT NULL,
+							language VARCHAR(50) DEFAULT "ENGLISH",
+							author VARCHAR(60) NOT NULL);
+
+descrição de uma tabela: DESCRIBE books;
+
+iserir dados numa tabela: INSERT books VALUE("Book Bla", 50.00, "Hindi", "Fulano de Tal"); 
+
+checar conteúdo de uma tabela: SELECT * FROM books;
+
+listar tabelas do banco de dados atual: SHOW TABLES
+
+criar chave primária: exemplo: CREATE TABLE books(id INT AUTO_INCREMENT,
+						title VARCHAR(50) NOT NULL,
+						price INT NOT NULL,
+						language VARCHAR(50) DEFAULT "ENGLISH",
+						author VARCHAR(60) NOT NULL,
+						PRIMARY KEY (id));
+
+criar chave estrangeira: exemplo: CREATE TABLE books(id INT AUTO_INCREMENT,
+						idautor INT NOT NULL,
+						title VARCHAR(50) NOT NULL,
+						price INT NOT NULL,
+						language VARCHAR(50) DEFAULT "ENGLISH",
+						author VARCHAR(60) NOT NULL,
+						PRIMARY KEY (id),
+						CONSRAINT fk_autor_livro FOREIGN KEY (idautor) REFERENCES authors (idauthor));
+
+outra forma de criar chave estrangeira (para este exemplo, a coluna `fk_autor` deve existir na tabela books): depois de criada a tabela, alterá-la assim: ALTER TABLE `book` ADD CONSTRAINT `fk_autor` FOREIGN KEY (PRIM`idautor`) REFERENCES `authors` (`idauthor`);
+
+
+adicionar coluna numa tabela: ALTER TABLE books ADD year INT(4);
+
+adicionar coluna numa tabela num local especifico: ALTER TABLE books ADD year INT(4) AFTER title;
+
+deletar uma coluna de uma tabela: ALTER TABLE book DROP email;
+
+deletar uma linha de uma tabela: DELETE from book where year=1988;
+
+inserindo dados em tabelas com chave estrangeira: exemplo: três tabelas:
+
+tabela 1: user_controler (id_controller, id_user, id_userfb)
+tabela 2: user(id_user, nome, email, senha)
+tabela 3: user_fb(id_userfb, nome, sobrenome, idfacebook)
+
+adicionando a partir de uma delas (user, neste exemplo):
+INSERT INTO user (id_user, nome, email, senha) VALUES (DEFAULT, "Fulano", "foo@lano.com", "1234");
+INSERT INTO user_controller (id_controller, id_user) VALUES (DEFAULT, LAST_INSERT_ID());
+
+Depois:
+INSERT INTO user_fb (id_userfb, nome, sobrenome, idfacebook) VALUES (DEFAULT, "Fulano", "Snow", "314159");
+INSERT INTO user_controller (id_controller, id_userfb) VALUES (DEFAULT, LAST_INSERT_ID());
+
+criando tabela a partir de query: CREATE TABLE novatabela AS SELECT produto, descricao, bairro FROM anuncio INNER JOIN estabelecimentos ON estabelecimentos.id = anuncio.idestabelecimento;
+
+match de srings: adicionar campo FULLTEXT e depois usar funcao MATCH: exemplo:
+ALTER TABLE `items` ADD FULLTEXT(`item_title`,`item_description`);
+
+SELECT * FROM items 
+WHERE MATCH (item_title,item_description) AGAINST ('dog')
+
+salvando/exportando um banco de dados: exemplo: digitar no termnal: mysqldump -u root -p dbteste > dbteste.sql
+
+importando/carregando um banco de dados: exemplo: digitar no terminal: primeiro criar um banco de dados para receber a importacao; depois (no terminal): mysql -u NOME_DO_USUÁRIO -p NOME_DA_BASE < arquivo.sql
+
+salvando tabela do banco de dados como .csv: exemplo:
+SELECT 
+    orderNumber, status, orderDate, requiredDate, comments
+FROM
+    orders
+WHERE
+    status = 'Cancelled' 
+INTO OUTFILE 'C:/tmp/cancelled_orders.csv' 
+FIELDS ENCLOSED BY '"' 
+TERMINATED BY ';' 
+ESCAPED BY '"' 
+LINES TERMINATED BY '\r\n';
+
+
+#####################################################################################
+
+##estabelecimento
+INSERT estabelecimentos VALUE(DEFAULT, "Pizzaria Fulano", DEFAULT, "Av. Flores", "101-A", "Centro", "São Paulo", "SP", "20929-234", "-22.0998,-44.09987", DEFAULT,0, LAST_INSERT_ID(), 1)
+
+##anuncios
+INSERT INTO anuncio (id, idestabelecimento, produto, descricao) VALUE(DEFAULT, 1, "pizza de chocolate", "super oferta: pizza de chocolate belga")
+
+##busca 
+SELECT produto, posicao FROM anuncio INNER JOIN estabelecimentos ON estabelecimentos.id =  anuncio.idestabelecimento;
+
